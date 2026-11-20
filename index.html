@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dynamic CV Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- Non-printing Studio Toolbar -->
+    <div class="toolbar no-print">
+      <div class="toolbar-inner">
+        <div class="toolbar-group">
+          <span class="toolbar-title">CV Studio</span>
+
+          <label class="control-label">
+            Layout
+            <select id="select-layout" class="control-select">
+              <option value="ats">ATS Classic (1-Col)</option>
+              <option value="modern">Modern Accent (1-Col)</option>
+              <option value="sidebar">Clean Sidebar (2-Col)</option>
+            </select>
+          </label>
+
+          <label class="control-label">
+            Focus
+            <select id="select-focus" class="control-select">
+              <option value="frontend">Frontend Focus</option>
+              <option value="fullstack">Fullstack Focus</option>
+            </select>
+          </label>
+
+          <label class="control-label">
+            Lang
+            <select id="select-lang" class="control-select">
+              <option value="en">EN</option>
+              <option value="id">ID</option>
+            </select>
+          </label>
+
+          <label class="control-label">
+            Accent
+            <select id="select-accent" class="control-select">
+              <option value="#0067FF">Cobalt Blue</option>
+              <option value="#0f172a">Slate Black</option>
+              <option value="#0e7490">Teal</option>
+              <option value="#4f46e5">Indigo</option>
+            </select>
+          </label>
+
+          <label class="control-label">
+            Photo
+            <select id="select-photo" class="control-select">
+              <option value="off">Hidden (ATS)</option>
+              <option value="on">Shown</option>
+            </select>
+          </label>
+
+          <label class="control-label">
+            Density
+            <select id="select-density" class="control-select">
+              <option value="compact">Compact</option>
+              <option value="comfortable">Comfortable</option>
+            </select>
+          </label>
+
+          <label class="control-label">
+            Size
+            <select id="select-fontsize" class="control-select">
+              <option value="9.3pt">9.3pt</option>
+              <option value="9.8pt">9.8pt</option>
+              <option value="10.4pt">10.4pt</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="toolbar-group">
+          <button type="button" id="btn-db" class="control-btn" style="background:#0284c7;color:#fff;border-color:#0284c7;">⚡ Database Supabase</button>
+          <button type="button" id="btn-edit" class="control-btn">Edit Text: OFF</button>
+          <button type="button" id="btn-reset" class="control-btn">Reset Draft</button>
+          <button type="button" id="btn-export-data" class="control-btn">Backup JSON</button>
+          <button type="button" id="btn-print" class="control-btn is-primary">Print / Save PDF</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="edit-hint no-print">
+      <span id="status-text">Edit cv-data.js or toggle "Edit Text: ON" to customize directly.</span>
+      <span>Tip PDF: <strong>Paper = A4</strong> · <strong>Margins = Default</strong> · <strong>Background graphics = On</strong></span>
+    </div>
+
+    <!-- Supabase Database Management Modal (no-print) -->
+    <div id="modal-db" class="modal-overlay no-print" role="dialog" aria-modal="true">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title">
+            <span>⚡ Supabase Database Manager (Opsi B: Relasional)</span>
+          </div>
+          <button type="button" id="modal-close" class="modal-close-btn" aria-label="Tutup">&times;</button>
+        </div>
+
+        <div class="modal-tabs">
+          <button type="button" class="modal-tab-btn is-active" data-tab="tab-config">Koneksi &amp; Auth</button>
+          <button type="button" class="modal-tab-btn" data-tab="tab-add-exp">+ Pengalaman</button>
+          <button type="button" class="modal-tab-btn" data-tab="tab-add-proj">+ Proyek</button>
+          <button type="button" class="modal-tab-btn" data-tab="tab-add-skill-edu">+ Skill &amp; Edu</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Tab 1: Config & Auth -->
+          <div id="tab-config" class="modal-tab-content is-active">
+            <div id="db-status-container">
+              <span id="db-status-badge" class="db-status-badge is-offline">● Status: Offline (Memakai cv-data.js lokal)</span>
+            </div>
+
+            <h4 style="margin: 8px 0 10px; font-size: 13px;">1. Parameter Koneksi Supabase</h4>
+            <div class="form-group">
+              <label class="form-label" for="input-supabase-url">Project URL</label>
+              <input type="url" id="input-supabase-url" class="form-input" placeholder="https://yourproject.supabase.co" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="input-supabase-key">Anon / Public API Key</label>
+              <input type="password" id="input-supabase-key" class="form-input" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." />
+            </div>
+            <div style="display: flex; gap: 8px; margin-bottom: 18px;">
+              <button type="button" id="btn-save-db-config" class="btn-primary">Simpan &amp; Tarik Data</button>
+              <button type="button" id="btn-disconnect-db" class="btn-secondary">Putuskan Koneksi</button>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 16px 0;" />
+
+            <h4 style="margin: 8px 0 6px; font-size: 13px;">2. Login Admin (Supabase Auth)</h4>
+            <p style="color: #64748b; font-size: 11.5px; margin-bottom: 10px;">
+              Publik dapat melihat CV tanpa login. Login hanya diperlukan untuk melakukan operasi <strong>INSERT, UPDATE, DELETE</strong> via Row Level Security (RLS).
+            </p>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="input-auth-email">Email Admin</label>
+                <input type="email" id="input-auth-email" class="form-input" placeholder="admin@example.com" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="input-auth-password">Password</label>
+                <input type="password" id="input-auth-password" class="form-input" placeholder="••••••••" />
+              </div>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button type="button" id="btn-login-auth" class="btn-primary">Login Admin</button>
+              <button type="button" id="btn-logout-auth" class="btn-secondary" style="display:none;">Logout</button>
+              <span id="auth-status-text" style="font-size: 12px; color: #64748b;">Belum login</span>
+            </div>
+          </div>
+
+          <!-- Tab 2: + Pengalaman -->
+          <div id="tab-add-exp" class="modal-tab-content">
+            <h4 style="margin: 0 0 12px; font-size: 13px;">Tambah Pengalaman Kerja Baru</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="exp-company">Nama Perusahaan *</label>
+                <input type="text" id="exp-company" class="form-input" placeholder="PT Contoh Teknologi" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="exp-location">Lokasi</label>
+                <input type="text" id="exp-location" class="form-input" placeholder="Jakarta, Indonesia" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="exp-role-en">Jabatan / Role (EN) *</label>
+                <input type="text" id="exp-role-en" class="form-input" placeholder="Senior Software Engineer" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="exp-role-id">Jabatan / Role (ID) *</label>
+                <input type="text" id="exp-role-id" class="form-input" placeholder="Senior Software Engineer" required />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="exp-period-en">Periode (EN)</label>
+                <input type="text" id="exp-period-en" class="form-input" placeholder="Jan 2023 – Present" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="exp-period-id">Periode (ID)</label>
+                <input type="text" id="exp-period-id" class="form-input" placeholder="Jan 2023 – Sekarang" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="exp-bullets-en">Poin Tanggung Jawab / Bullets (EN) — Pisahkan dengan baris baru</label>
+              <textarea id="exp-bullets-en" class="form-textarea" placeholder="Built responsive user interfaces with React and Tailwind CSS&#10;Integrated RESTful APIs..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="exp-bullets-id">Poin Tanggung Jawab / Bullets (ID) — Pisahkan dengan baris baru</label>
+              <textarea id="exp-bullets-id" class="form-textarea" placeholder="Membangun antarmuka web responsif dengan React dan Tailwind CSS&#10;Mengintegrasikan RESTful API..."></textarea>
+            </div>
+            <button type="button" id="btn-submit-exp" class="btn-primary">+ Simpan Pengalaman ke Supabase</button>
+          </div>
+
+          <!-- Tab 3: + Proyek -->
+          <div id="tab-add-proj" class="modal-tab-content">
+            <h4 style="margin: 0 0 12px; font-size: 13px;">Tambah Proyek / Portofolio Baru</h4>
+            <div class="form-group">
+              <label class="form-label" for="proj-name">Nama Proyek *</label>
+              <input type="text" id="proj-name" class="form-input" placeholder="Platform Enterprise RBAC" required />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="proj-stack">Tech Stack</label>
+                <input type="text" id="proj-stack" class="form-input" placeholder="React, TypeScript, Supabase, Tailwind CSS" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="proj-url">URL Demo / Repo</label>
+                <input type="url" id="proj-url" class="form-input" placeholder="https://example.com" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="proj-desc-en">Deskripsi Singkat (EN)</label>
+              <textarea id="proj-desc-en" class="form-textarea" placeholder="Production-ready administrative dashboard demonstrating granular RBAC..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="proj-desc-id">Deskripsi Singkat (ID)</label>
+              <textarea id="proj-desc-id" class="form-textarea" placeholder="Dashboard administratif siap produksi dengan demonstrasi kontrol akses RBAC..."></textarea>
+            </div>
+            <button type="button" id="btn-submit-proj" class="btn-primary">+ Simpan Proyek ke Supabase</button>
+          </div>
+
+          <!-- Tab 4: + Skill & Edu -->
+          <div id="tab-add-skill-edu" class="modal-tab-content">
+            <h4 style="margin: 0 0 10px; font-size: 13px;">Tambah Kategori Keahlian (Skill)</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="skill-label-en">Label Kategori (EN)</label>
+                <input type="text" id="skill-label-en" class="form-input" placeholder="Cloud &amp; DevOps" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="skill-label-id">Label Kategori (ID)</label>
+                <input type="text" id="skill-label-id" class="form-input" placeholder="Cloud &amp; DevOps" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="skill-items">Daftar Tools / Skills (pisahkan dengan koma)</label>
+              <input type="text" id="skill-items" class="form-input" placeholder="Docker, Kubernetes, AWS, CI/CD" />
+            </div>
+            <button type="button" id="btn-submit-skill" class="btn-primary" style="margin-bottom: 20px;">+ Simpan Skill ke Supabase</button>
+
+            <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 16px 0;" />
+
+            <h4 style="margin: 0 0 10px; font-size: 13px;">Tambah Riwayat Pendidikan</h4>
+            <div class="form-group">
+              <label class="form-label" for="edu-school">Institusi / Universitas</label>
+              <input type="text" id="edu-school" class="form-input" placeholder="Universitas Indonesia" />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="edu-degree-en">Gelar / Jurusan (EN)</label>
+                <input type="text" id="edu-degree-en" class="form-input" placeholder="Bachelor of Computer Science" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="edu-degree-id">Gelar / Jurusan (ID)</label>
+                <input type="text" id="edu-degree-id" class="form-input" placeholder="Sarjana Ilmu Komputer" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="edu-period">Tahun / Periode</label>
+              <input type="text" id="edu-period" class="form-input" placeholder="2018 – 2022" />
+            </div>
+            <button type="button" id="btn-submit-edu" class="btn-primary">+ Simpan Pendidikan ke Supabase</button>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="modal-footer-close" class="btn-secondary">Tutup</button>
+        </div>
+      </div>
+    </div>
+
+    <main class="sheet-wrapper">
+      <article id="cv-sheet" class="cv-sheet layout-ats" data-density="compact"></article>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="cv-data.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
