@@ -153,49 +153,57 @@ CREATE POLICY "Auth manage cv_projects" ON cv_projects FOR ALL TO authenticated 
 CREATE POLICY "Auth manage cv_educations" ON cv_educations FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
 -- ==============================================================================
--- 12. SEED DUMMY DATA (Alex Pratama)
+-- 12. SEED DUMMY DATA (Mahasiswa UGM Jurusan Manajemen - FEB UGM)
 -- ==============================================================================
 
 DO $$
 DECLARE
     v_profile_id UUID;
-    v_exp_nc UUID;
-    v_exp_ft UUID;
-    v_exp_di UUID;
+    v_exp_unilever UUID;
+    v_exp_mandiri UUID;
+    v_exp_ikamma UUID;
 BEGIN
     -- Masukkan Profil Utama
     INSERT INTO cv_profiles (slug, name, location, phone, email, portfolio, showcase, linkedin, gitlab, photo_url)
     VALUES (
         'primary',
-        'Alex Pratama',
-        'Jakarta, Indonesia (Open to Remote)',
-        '+62 812-3456-7890',
-        'alex.pratama@example.com',
-        'https://alexpratama.dev',
-        'https://alexpratama.dev/showcase',
-        'https://linkedin.com/in/alexpratama-dummy',
-        'https://gitlab.com/alexpratama-dummy',
+        'Dimas Arya Wijaya',
+        'Sleman, D.I. Yogyakarta (Open to On-site & Hybrid)',
+        '+62 812-9876-5432',
+        'dimas.arya.wijaya@mail.ugm.ac.id',
+        'https://dimaswijaya.com',
+        'https://dimaswijaya.com/portfolio',
+        'https://linkedin.com/in/dimas-arya-wijaya-dummy',
+        'https://github.com/dimas-arya-wijaya',
         'assets/profile.jpg'
     )
-    ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name
+    ON CONFLICT (slug) DO UPDATE SET 
+        name = EXCLUDED.name,
+        location = EXCLUDED.location,
+        phone = EXCLUDED.phone,
+        email = EXCLUDED.email,
+        portfolio = EXCLUDED.portfolio,
+        showcase = EXCLUDED.showcase,
+        linkedin = EXCLUDED.linkedin,
+        gitlab = EXCLUDED.gitlab
     RETURNING id INTO v_profile_id;
 
     -- Titles
     INSERT INTO cv_titles (profile_id, focus, title_en, title_id)
     VALUES 
-        (v_profile_id, 'frontend', 'Senior Frontend Engineer', 'Senior Frontend Engineer'),
-        (v_profile_id, 'fullstack', 'Fullstack Software Engineer', 'Fullstack Software Engineer')
+        (v_profile_id, 'frontend', 'Business Development & Marketing Specialist', 'Spesialis Pengembangan Bisnis & Pemasaran'),
+        (v_profile_id, 'fullstack', 'Corporate Finance & Operations Analyst', 'Analis Keuangan Korporasi & Manajemen Operasional')
     ON CONFLICT (profile_id, focus) DO UPDATE SET title_en = EXCLUDED.title_en, title_id = EXCLUDED.title_id;
 
     -- Summaries
     INSERT INTO cv_summaries (profile_id, focus, summary_en, summary_id)
     VALUES 
         (v_profile_id, 'frontend', 
-         'Frontend-focused Software Engineer with 5+ years of experience building scalable, responsive web portals, enterprise design systems, and commercial SaaS applications. Specialized in React, TypeScript, Vue.js, Next.js, Tailwind CSS, and performance optimization with deep understanding of RESTful/GraphQL integrations and web accessibility.',
-         'Frontend Software Engineer dengan pengalaman 5+ tahun dalam membangun portal web berskala besar, sistem desain enterprise, dan aplikasi SaaS komersial. Menguasai React, TypeScript, Vue.js, Next.js, Tailwind CSS, dan optimasi performa web dengan pemahaman mendalam tentang integrasi RESTful/GraphQL dan aksesibilitas web.'),
+         'Final-year Management student at Faculty of Economics and Business, Universitas Gadjah Mada (FEB UGM) with 3.86/4.00 GPA, specializing in Strategic Marketing and Market Expansion. Proven track record in national business case competitions and brand activation internships at multinational FMCG. Adept at customer journey mapping, competitor intelligence, digital campaign ROI optimization, and cross-functional leadership.',
+         'Mahasiswa tingkat akhir Jurusan Manajemen Fakultas Ekonomika dan Bisnis Universitas Gadjah Mada (FEB UGM) dengan IPK 3,86/4,00, peminatan Manajemen Pemasaran dan Ekspansi Bisnis. Berpengalaman dalam kejuaraan kompetisi business case nasional serta magang aktivasi merek di perusahaan FMCG multinasional. Terampil dalam riset konsumen, pemetaan pesaing, analisis ROI kampanye, dan kepemimpinan tim lintas divisi.'),
         (v_profile_id, 'fullstack',
-         'Fullstack Software Engineer with 5+ years of experience engineering distributed backend services and intuitive modern interfaces. Proficient in Node.js, Go, PostgreSQL, React, TypeScript, and Docker containerization, with solid background in building secure role-based access systems (RBAC) and payment gateway workflows.',
-         'Fullstack Software Engineer dengan pengalaman 5+ tahun dalam merancang layanan backend terdistribusi dan antarmuka web modern yang intuitif. Mahir menggunakan Node.js, Go, PostgreSQL, React, TypeScript, dan kontainerisasi Docker, dengan rekam jejak kuat dalam membangun sistem hak akses (RBAC) aman dan alur pembayaran digital.')
+         'Management undergraduate at Universitas Gadjah Mada (FEB UGM) focusing on Corporate Finance and Operational Strategy (GPA: 3.86/4.00). Experienced in corporate loan evaluation, financial statement forecasting, and cost-benefit feasibility studies from commercial banking internships. Highly proficient in financial modeling (DCF/NPV), budgeting, working capital analysis, and ERP workflow coordination.',
+         'Mahasiswa Jurusan Manajemen Universitas Gadjah Mada (FEB UGM) dengan fokus Keuangan Korporat dan Manajemen Operasional (IPK: 3,86/4,00). Berpengalaman dalam analisis kelayakan kredit korporasi, peramalan laporan keuangan, dan studi kelayakan biaya-manfaat melalui magang di perbankan nasional. Mahir dalam pemodelan keuangan (DCF/NPV), budgeting, manajemen modal kerja, dan koordinasi sistem ERP.')
     ON CONFLICT (profile_id, focus) DO UPDATE SET summary_en = EXCLUDED.summary_en, summary_id = EXCLUDED.summary_id;
 
     -- Hapus data child lama jika ada agar seed idempotent
@@ -207,76 +215,75 @@ BEGIN
     -- Skills
     INSERT INTO cv_skills (profile_id, label_en, label_id, items, sort_order)
     VALUES
-        (v_profile_id, 'Frontend & UI Engineering', 'Frontend & Rekayasa UI', 'React, TypeScript, Vue.js, Next.js, Tailwind CSS, HTML5/CSS3, State Management (Zustand/Redux), Responsive UI, Figma to Code, Jest, Vitest', 1),
-        (v_profile_id, 'Backend, APIs & Databases', 'Backend, API & Basis Data', 'Node.js (Express/NestJS), Go (Gin/Echo), RESTful API Architecture, GraphQL, PostgreSQL, MySQL, Redis, Supabase, Prisma ORM', 2),
-        (v_profile_id, 'Architecture, Security & QA', 'Arsitektur, Keamanan & QA', 'Clean Architecture, Role-Based Access Control (RBAC), OAuth 2.0 / JWT, Web Security (CORS, CSP, XSS), CI/CD, Unit & Integration Testing', 3),
-        (v_profile_id, 'DevOps & Tooling', 'DevOps & Perangkat Lunak', 'Git, GitHub Actions, Docker, Linux, Netlify, Vercel, Postman, Swagger, Agile / Scrum Workflow', 4);
+        (v_profile_id, 'Business Strategy & Marketing', 'Strategi Bisnis & Pemasaran', 'Market Research & Sizing (TAM/SAM/SOM), Brand Activation, Consumer Behavior Analysis, Go-To-Market (GTM) Strategy, Growth Marketing, SWOT & Porter''s Five Forces', 1),
+        (v_profile_id, 'Financial Analysis & Valuation', 'Analisis Keuangan & Valuasi', 'Discounted Cash Flow (DCF), Financial Statement Forecasting, Capital Budgeting, Cost-Benefit Analysis, Ratio & Sensitivity Analysis, Credit Assessment', 2),
+        (v_profile_id, 'Operations & Project Management', 'Manajemen Operasional & Proyek', 'Supply Chain Fundamentals, Agile & Scrum, Lean Operations, Risk Assessment, Key Performance Indicators (KPI) Tracking, SAP/ERP Basics', 3),
+        (v_profile_id, 'Tools & Data Analytics', 'Perangkat Analisis & Data', 'Advanced Microsoft Excel (VLOOKUP, Pivot, What-If Analysis, Solver), Tableau, Power BI, SPSS, Google Analytics, Pitch Deck Design (Canva/Figma)', 4);
 
-    -- Experience 1: PT Nusantara Cloud Solutions
+    -- Experience 1: PT Unilever Indonesia Tbk
     INSERT INTO cv_experiences (profile_id, identifier, company, location, type_en, type_id, period_en, period_id, role_en, role_id, sort_order)
-    VALUES (v_profile_id, 'nusantara-cloud', 'PT Nusantara Cloud Solutions', 'Jakarta, Indonesia', 'Full-Time', 'Full-Time', 'Jan 2023 – Present', 'Jan 2023 – Sekarang', 'Senior Frontend & Backend Engineer', 'Senior Frontend & Backend Engineer', 1)
-    RETURNING id INTO v_exp_nc;
+    VALUES (v_profile_id, 'unilever-indonesia', 'PT Unilever Indonesia Tbk', 'Tangerang / Hybrid', 'Internship', 'Magang', 'Jul 2025 – Dec 2025', 'Jul 2025 – Des 2025', 'Brand Marketing & Trade Promotion Intern', 'Intern Manajemen Merek & Promosi Perdagangan', 1)
+    RETURNING id INTO v_exp_unilever;
 
-    -- Bullets Nusantara Cloud (Frontend)
+    -- Bullets Unilever (Frontend - Marketing Focus)
     INSERT INTO cv_experience_bullets (experience_id, focus, text_en, text_id, sort_order) VALUES
-        (v_exp_nc, 'frontend', 'Architected scalable component libraries and responsive web dashboards using React, TypeScript, and Tailwind CSS serving 100K+ monthly active users.', 'Merancang pustaka komponen berskala besar dan dashboard web responsif menggunakan React, TypeScript, dan Tailwind CSS untuk 100rb+ pengguna aktif bulanan.', 1),
-        (v_exp_nc, 'frontend', 'Collaborated closely with product designers to convert complex Figma mockups into reusable, accessible, and high-performance UI components.', 'Berkolaborasi erat dengan desainer produk untuk menerjemahkan mockup Figma menjadi komponen UI yang dapat digunakan kembali, aksesibel, dan cepat.', 2),
-        (v_exp_nc, 'frontend', 'Optimized client-side rendering performance and state management, reducing initial bundle size and page load time by 35%.', 'Mengoptimalkan performa rendering sisi klien dan manajemen state, mengurangi ukuran bundle awal dan waktu muat halaman sebesar 35%.', 3),
-        (v_exp_nc, 'frontend', 'Integrated secure RESTful APIs and real-time WebSocket feeds for financial analytics and transaction monitoring.', 'Mengintegrasikan RESTful API yang aman dan aliran data real-time WebSocket untuk modul analitik keuangan dan pemantauan transaksi.', 4);
+        (v_exp_unilever, 'frontend', 'Spearheaded brand activation execution across 14 key modern retail accounts in Java, contributing to a 12% quarterly sales volume lift.', 'Memimpin eksekusi aktivasi merek di 14 jaringan ritel modern utama wilayah Jawa, berkontribusi pada peningkatan volume penjualan sebesar 12% kuartalan.', 1),
+        (v_exp_unilever, 'frontend', 'Synthesized retail audit scanner data (NielsenIQ) and shopper demographic insights to formulate localized promotional calendar.', 'Menganalisis data audit ritel (NielsenIQ) dan demografi pembeli untuk merumuskan jadwal promosi tematik yang tepat sasaran.', 2),
+        (v_exp_unilever, 'frontend', 'Collaborated with creative agencies, logistics distributors, and legal teams to guarantee 100% on-time deployment of in-store POSM display materials.', 'Berkolaborasi dengan agensi kreatif, distributor logistik, dan tim legal untuk memastikan penyebaran materi promosi POSM tepat waktu.', 3);
 
-    -- Bullets Nusantara Cloud (Fullstack)
+    -- Bullets Unilever (Fullstack - Finance & Ops Focus)
     INSERT INTO cv_experience_bullets (experience_id, focus, text_en, text_id, sort_order) VALUES
-        (v_exp_nc, 'fullstack', 'Engineered resilient microservices using Go and Node.js backed by PostgreSQL and Redis caching layers.', 'Mengembangkan layanan microservice tangguh menggunakan Go dan Node.js didukung basis data PostgreSQL dan layer caching Redis.', 1),
-        (v_exp_nc, 'fullstack', 'Spearheaded the migration of monolithic endpoints to modular RESTful APIs with automated API documentation via OpenAPI/Swagger.', 'Memimpin migrasi endpoint monolitik ke RESTful API modular yang terdokumentasi otomatis menggunakan OpenAPI/Swagger.', 2),
-        (v_exp_nc, 'fullstack', 'Implemented comprehensive Role-Based Access Control (RBAC) and audit trail logging to satisfy regulatory enterprise compliance.', 'Mengimplementasikan sistem hak akses berbasis peran (RBAC) dan pencatatan riwayat audit untuk memenuhi kepatuhan standar enterprise.', 3),
-        (v_exp_nc, 'fullstack', 'Configured Dockerized deployment pipelines with GitHub Actions for zero-downtime releases on cloud infrastructure.', 'Mengonfigurasi alur deployment berbasis Docker dengan GitHub Actions untuk rilis berkelanjutan tanpa downtime di infrastruktur cloud.', 4);
+        (v_exp_unilever, 'fullstack', 'Monitored and reconciled brand marketing expenditures against allocated quarterly budget of IDR 3.2 Billion, achieving zero budget overshoot.', 'Memantau dan merekonsiliasi pengeluaran pemasaran merek terhadap anggaran kuartalan sebesar Rp 3,2 Miliar tanpa adanya over-budget.', 1),
+        (v_exp_unilever, 'fullstack', 'Conducted post-campaign ROI evaluations and sensitivity analyses across promotional SKU bundles, identifying IDR 180 Million in cost-saving efficiencies.', 'Melakukan evaluasi ROI dan analisis sensitivitas pasca-kampanye pada bundel produk, mengidentifikasi potensi efisiensi biaya sebesar Rp 180 Juta.', 2),
+        (v_exp_unilever, 'fullstack', 'Streamlined weekly inventory stock reconciliation with third-party distribution hubs, mitigating out-of-stock risk during festive promotions.', 'Mengoptimalkan rekonsiliasi stok inventaris mingguan dengan pusat distribusi, meminimalkan risiko kehabisan stok saat periode puncak promosi.', 3);
 
-    -- Experience 2: Fintech Solusi Utama
+    -- Experience 2: PT Bank Mandiri (Persero) Tbk
     INSERT INTO cv_experiences (profile_id, identifier, company, location, type_en, type_id, period_en, period_id, role_en, role_id, sort_order)
-    VALUES (v_profile_id, 'fintech-solusi', 'Fintech Solusi Utama', 'Bandung, Indonesia (Remote)', 'Contract', 'Kontrak', 'Jun 2022 – Dec 2022', 'Jun 2022 – Des 2022', 'Fullstack Software Engineer', 'Fullstack Software Engineer', 2)
-    RETURNING id INTO v_exp_ft;
+    VALUES (v_profile_id, 'bank-mandiri', 'PT Bank Mandiri (Persero) Tbk', 'Yogyakarta, Indonesia', 'Internship', 'Magang', 'Jan 2025 – Jun 2025', 'Jan 2025 – Jun 2025', 'Commercial Banking Credit Analyst Intern', 'Intern Analis Kredit Perbankan Komersial', 2)
+    RETURNING id INTO v_exp_mandiri;
 
-    -- Bullets Fintech Solusi (Frontend)
+    -- Bullets Bank Mandiri (Frontend - Strategy Focus)
     INSERT INTO cv_experience_bullets (experience_id, focus, text_en, text_id, sort_order) VALUES
-        (v_exp_ft, 'frontend', 'Developed intuitive customer onboarding and identity verification (e-KYC) flows using Vue.js and Tailwind CSS.', 'Mengembangkan alur pendaftaran pengguna baru dan verifikasi identitas (e-KYC) yang intuitif menggunakan Vue.js dan Tailwind CSS.', 1),
-        (v_exp_ft, 'frontend', 'Implemented strict form validation, error handling, and client-side payload sanitization for sensitive user inputs.', 'Menerapkan validasi formulir ketat, penanganan error interaktif, dan sanitasi data sisi klien untuk input pengguna yang sensitif.', 2);
+        (v_exp_mandiri, 'frontend', 'Synthesized macroeconomic and regional industry sector reports to assess market competitiveness for prospective commercial borrowers.', 'Menyusun laporan kondisi makroekonomi dan sektor industri regional untuk menilai daya saing pasar calon debitur komersial.', 1),
+        (v_exp_mandiri, 'frontend', 'Co-authored client credit proposals and presentation decks delivered to the Regional Credit Committee for facilities totaling IDR 45 Billion.', 'Turut menyusun proposal kredit dan materi presentasi bagi Komite Kredit Regional untuk fasilitas pembiayaan senilai total Rp 45 Miliar.', 2);
 
-    -- Bullets Fintech Solusi (Fullstack)
+    -- Bullets Bank Mandiri (Fullstack - Finance Focus)
     INSERT INTO cv_experience_bullets (experience_id, focus, text_en, text_id, sort_order) VALUES
-        (v_exp_ft, 'fullstack', 'Designed and implemented payment gateway webhooks and automated reconciliation services connecting multiple banking APIs.', 'Merancang dan mengimplementasikan webhook payment gateway serta modul rekonsiliasi otomatis yang terhubung ke beberapa API perbankan.', 1),
-        (v_exp_ft, 'fullstack', 'Created robust idempotent transactional routines to eliminate duplicate payments during intermittent network latency.', 'Membangun alur transaksi idempoten untuk mencegah terjadinya pembayaran ganda saat terjadi gangguan jaringan.', 2);
+        (v_exp_mandiri, 'fullstack', 'Built multi-scenario cash flow forecast models and debt service coverage ratio (DSCR) calculations for manufacturing and agro-industry clients.', 'Membangun model proyeksi arus kas multi-skenario dan rasio kecukupan pelunasan utang (DSCR) untuk nasabah sektor manufaktur dan agroindustri.', 1),
+        (v_exp_mandiri, 'fullstack', 'Audited historical financial statements (3-year trends) and verified legal covenant compliance for an active commercial borrower portfolio.', 'Mengaudit tren laporan keuangan historis (3 tahun) dan memverifikasi kepatuhan persyaratan kredit pada portofolio debitur aktif.', 2);
 
-    -- Experience 3: PT Digital Inovasi Mandiri
+    -- Experience 3: Ikatan Keluarga Mahasiswa Manajemen (IKAMMA) FEB UGM
     INSERT INTO cv_experiences (profile_id, identifier, company, location, type_en, type_id, period_en, period_id, role_en, role_id, sort_order)
-    VALUES (v_profile_id, 'digital-inovasi', 'PT Digital Inovasi Mandiri', 'Jakarta, Indonesia', 'Full-Time', 'Full-Time', 'Jan 2021 – May 2022', 'Jan 2021 – Mei 2022', 'Frontend Developer', 'Pengembang Frontend', 3)
-    RETURNING id INTO v_exp_di;
+    VALUES (v_profile_id, 'ikamma-ugm', 'IKAMMA FEB UGM', 'Yogyakarta, Indonesia', 'Organization', 'Organisasi', 'Jan 2024 – Dec 2024', 'Jan 2024 – Des 2024', 'Head of Business Development & Partnership', 'Kepala Departemen Pengembangan Bisnis & Kemitraan', 3)
+    RETURNING id INTO v_exp_ikamma;
 
-    -- Bullets Digital Inovasi (Frontend)
+    -- Bullets IKAMMA UGM (Frontend)
     INSERT INTO cv_experience_bullets (experience_id, focus, text_en, text_id, sort_order) VALUES
-        (v_exp_di, 'frontend', 'Built responsive e-commerce web applications and interactive landing pages using modern JavaScript (ES6+), HTML5, and CSS3.', 'Membangun aplikasi web e-commerce responsif dan landing page interaktif menggunakan JavaScript modern (ES6+), HTML5, dan CSS3.', 1),
-        (v_exp_di, 'frontend', 'Integrated third-party analytics, customer support chat widgets, and social login authentication.', 'Mengintegrasikan layanan analitik pihak ketiga, widget obrolan bantuan pelanggan, dan autentikasi login media sosial.', 2);
+        (v_exp_ikamma, 'frontend', 'Formulated enterprise sponsorship pitching strategy, securing IDR 210 Million in cash and in-kind partnerships from 11 corporate sponsors.', 'Merumuskan strategi proposal sponsor korporasi, menghimpun pendanaan kemitraan senilai Rp 210 Juta dari 11 sponsor perusahaan nasional.', 1),
+        (v_exp_ikamma, 'frontend', 'Led a committee team of 16 students organizing the flagship Gadjah Mada Business Case Competition (GMBCC) with 250+ delegates from ASEAN universities.', 'Memimpin tim panitia 16 mahasiswa dalam menyelenggarakan Gadjah Mada Business Case Competition (GMBCC) dengan 250+ delegasi dari kampus se-ASEAN.', 2);
 
-    -- Bullets Digital Inovasi (Fullstack)
+    -- Bullets IKAMMA UGM (Fullstack)
     INSERT INTO cv_experience_bullets (experience_id, focus, text_en, text_id, sort_order) VALUES
-        (v_exp_di, 'fullstack', 'Contributed to back-office order management APIs using Node.js/Express and MySQL alongside frontend admin templates.', 'Berkontribusi dalam pembuatan API manajemen pesanan back-office menggunakan Node.js/Express dan MySQL serta template admin frontend.', 1);
+        (v_exp_ikamma, 'fullstack', 'Managed overall organizational operating budget of IDR 350 Million with comprehensive financial transparency audits and post-event reporting.', 'Mengelola total anggaran operasional organisasi sebesar Rp 350 Juta dengan audit transparansi finansial dan pelaporan pertanggungjawaban lengkap.', 1),
+        (v_exp_ikamma, 'fullstack', 'Standardized procurement workflow and event vendor contracts, negotiating bulk price discounts that reduced operational expenditures by 15%.', 'Menstandarkan alur pengadaan logistik dan kontrak vendor acara, menegosiasikan potongan harga yang menghemat biaya pengeluaran operasional hingga 15%.', 2);
 
-    -- Projects
+    -- Projects & Case Competitions
     INSERT INTO cv_projects (profile_id, name, stack, url, desc_en, desc_id, sort_order)
     VALUES
-        (v_profile_id, 'Enterprise RBAC & Audit Platform', 'React, TypeScript, Tailwind CSS, PostgreSQL, Supabase', 'https://demo-rbac.example.com',
-         'Production-ready administrative dashboard demonstrating granular Role-Based Access Control, live session revocation, activity audit logs, and internationalized UI (EN/ID).',
-         'Dashboard administratif siap produksi dengan demonstrasi kontrol hak akses bertingkat (RBAC), pembatalan sesi aktif, pencatatan log audit, dan antarmuka multibahasa (EN/ID).', 1),
-        (v_profile_id, 'Omnichannel Payment & Billing Engine', 'Go, PostgreSQL, Redis, Docker, Payment Gateway APIs', 'https://billing.example.com',
-         'High-throughput transactional microservice supporting multi-vendor payment gateways, automated webhook retries, and real-time invoice generation.',
-         'Microservice transaksi berkecepatan tinggi yang mendukung integrasi multi-vendor payment gateway, percobaan ulang webhook otomatis, dan pembuatan invoice real-time.', 2),
-        (v_profile_id, 'Smart Citizen Public Services Portal', 'Vue.js, Nuxt.js, Tailwind CSS, REST APIs', 'https://portal.example.com',
-         'Public-facing civic complaint and service request portal built with responsive, accessible layout and mobile-first navigation.',
-         'Portal layanan publik dan pengaduan masyarakat berbasis web dengan tata letak responsif, standar aksesibilitas ramah pengguna, dan navigasi ramah seluler.', 3);
+        (v_profile_id, '1st Place Winner — National Business Case Competition 2025', 'Market Sizing, DCF Valuation, GTM Strategy, Pitch Deck', 'https://gmbcc.feb.ugm.ac.id',
+         'Champion among 140+ university teams across Indonesia; crafted a comprehensive 5-year market expansion and digital ecosystem adoption strategy for a prominent financial institution.',
+         'Juara 1 di antara 140+ tim universitas se-Indonesia; merancang strategi penetrasi pasar 5 tahun dan adopsi ekosistem digital untuk institusi perbankan nasional terkemuka.', 1),
+        (v_profile_id, 'SME Financial Restructuring & Digital Marketing Consulting', 'Financial Literacy, Cost Accounting, POS Digitalization', 'https://feb.ugm.ac.id/pengabdian',
+         'Conducted community consulting project for 8 culinary MSMEs in Sleman, establishing digital bookkeeping workflows and reducing inventory ingredient waste by 18%.',
+         'Menjalankan proyek konsultasi pemberdayaan 8 UMKM kuliner di Sleman, mengimplementasikan pencatatan keuangan digital dan menekan pemborosan bahan baku hingga 18%.', 2),
+        (v_profile_id, 'ESG Branding & Gen-Z Consumer Purchase Intention Research', 'SPSS, Structural Equation Modeling, Survey Design', 'https://etd.repository.ugm.ac.id',
+         'Undergraduate capstone research examining the empirical impact of corporate sustainability initiatives on purchasing decisions among 420 surveyed millennial and Gen-Z consumers in Java.',
+         'Riset terapan skripsi yang menguji pengaruh inisiatif keberlanjutan (ESG) korporasi terhadap keputusan pembelian pada 420 responden konsumen generasi muda di Pulau Jawa.', 3);
 
     -- Education
     INSERT INTO cv_educations (profile_id, school, degree_en, degree_id, period, sort_order)
     VALUES
-        (v_profile_id, 'Universitas Teknologi Nusantara', 'Bachelor''s Degree in Computer Science', 'Sarjana (S1) Ilmu Komputer', '2018 – 2022', 1),
-        (v_profile_id, 'Politeknik Digital Indonesia', 'Diploma in Informatics Engineering', 'Diploma (D3) Teknik Informatika', '2015 – 2018', 2);
+        (v_profile_id, 'Universitas Gadjah Mada (UGM)', 'Bachelor of Economics (S.M.) in Management — Faculty of Economics and Business (FEB)', 'Sarjana Manajemen (S.M.) — Fakultas Ekonomika dan Bisnis (FEB)', '2022 – Present (Expected: 2026)', 1),
+        (v_profile_id, 'SMA Negeri 3 Yogyakarta', 'High School Diploma in Social Sciences (IPS)', 'Sekolah Menengah Atas (Jurusan IPS)', '2019 – 2022', 2);
 
 END $$;
